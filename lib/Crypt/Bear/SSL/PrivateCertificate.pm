@@ -12,7 +12,7 @@ use Crypt::Bear::X509::PrivateKey;
 
 sub load {
 	my ($class, $chain_file, $key_file, @extra) = @_;
-	my $chain = Crypt::Bear::X509::Certificate::Chain->new->load($chain_file);
+	my $chain = Crypt::Bear::X509::Certificate::Chain->load($chain_file);
 	my $key = Crypt::Bear::X509::PrivateKey->load($key_file);
 
 	return $class->new($chain, $key, @extra);

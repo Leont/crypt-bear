@@ -7,7 +7,9 @@ use Crypt::Bear;
 use Crypt::Bear::PEM;
 
 sub load {
-	my ($self, $filename) = @_;
+	my ($class, $filename) = @_;
+
+	my $self = $class->new;
 
 	open my $fh, '<:crlf', $filename or die "Could not open certificate $filename: $!";
 	my $raw = do { local $/; <$fh> };
