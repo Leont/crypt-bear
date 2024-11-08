@@ -15,4 +15,4 @@ use Crypt::Bear;
 
 =method forget_session()
 
-=method set_client_certificate($certificate_chain, $private_key, $usages = 'both')
+=method set_client_certificate($private_certificate)

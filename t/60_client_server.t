@@ -6,27 +6,24 @@ use warnings;
 use Test::More;
 
 use Crypt::Bear::X509::TrustAnchors;
-use Crypt::Bear::X509::Certificate::Chain;
-use Crypt::Bear::X509::PrivateKey;
+use Crypt::Bear::SSL::PrivateCertificate;
 
 use Crypt::Bear::SSL::Client;
 use Crypt::Bear::SSL::Server;
 
 my $anchors = Crypt::Bear::X509::TrustAnchors->new->load_file('t/server.crt');
-my $chain = Crypt::Bear::X509::Certificate::Chain->new->load('t/server.crt');
-my $key = Crypt::Bear::X509::PrivateKey->load('t/server.key');
+my $private_certificate = Crypt::Bear::SSL::PrivateCertificate->load('t/server.crt', 't/server.key');
+
+ok $anchors;
+is $anchors->count, 1;
+ok $private_certificate;
+is $private_certificate->chain->count, 1;
 
 my $client = Crypt::Bear::SSL::Client->new($anchors);
-my $server = Crypt::Bear::SSL::Server->new($chain, $key);
+my $server = Crypt::Bear::SSL::Server->new($private_certificate);
 
 ok $client;
-ok $anchors;
-ok $chain;
-ok $key;
 ok $server;
-is $anchors->count, 1;
-is $chain->count, 1;
-
 ok $client->reset('server');
 ok $server->reset;
 

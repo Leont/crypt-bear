@@ -871,10 +871,53 @@ typedef br_ssl_engine_context* Crypt__Bear__SSL__Engine;
 typedef const br_ssl_client_certificate_class** Crypt__Bear__SSL__Client__Certificate;
 
 
+typedef struct private_certificate {
+	struct certificate_chain chain;
+	struct private_key key;
+	unsigned usage;
+} *Crypt__Bear__SSL__PrivateCertificate;
+
+#define private_certificate_init(self) memset(self, '\0', sizeof(struct private_certificate))
+
+static void S_private_certificate_copy(pTHX_ struct private_certificate* dest, const struct private_certificate* source) {
+	certificate_chain_copy(&dest->chain, &source->chain);
+	private_key_copy(&dest->key, &source->key);
+}
+#define private_certificate_copy(dest, source) S_private_certificate_copy(aTHX_ dest, source)
+
+static int private_certificate_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
+	struct private_certificate* old = (struct private_certificate*)magic->mg_ptr;
+	struct private_certificate* copy = safemalloc(sizeof *copy);
+
+	private_certificate_copy(copy, old);
+	magic->mg_ptr = (char*)copy;
+
+	return 0;
+}
+
+static void S_private_certificate_destroy(pTHX_ struct private_certificate* self) {
+	private_key_destroy(&self->key);
+	certificate_chain_destroy(&self->chain);
+}
+#define private_certificate_destroy(self) S_private_certificate_destroy(aTHX_ self)
+
+static int private_certificate_free(pTHX_ SV* sv, MAGIC* magic) {
+	struct private_certificate* self = (struct private_certificate*)magic->mg_ptr;
+	private_certificate_destroy(self);
+	Safefree(self);
+	return 0;
+}
+
+
+static const MGVTBL Crypt__Bear__SSL__PrivateCertificate_magic = {
+	.svt_dup = private_certificate_dup,
+	.svt_free = private_certificate_free,
+};
+
+
 typedef struct ssl_client {
 	br_ssl_client_context context;
-	struct certificate_chain chain;
-	struct private_key private_key;
+	struct private_certificate private;
 	unsigned char buffer[BR_SSL_BUFSIZE_BIDI];
 	br_x509_minimal_context minimal;
 	struct trust_anchors trust_anchors;
@@ -890,8 +933,7 @@ static int ssl_client_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
 	struct ssl_client* old = (struct ssl_client*)magic->mg_ptr;
 	struct ssl_client* copy = safemalloc(sizeof *copy);
 
-	certificate_chain_copy(&copy->chain, &old->chain);
-	private_key_copy(&copy->private_key, &old->private_key);
+	private_certificate_copy(&copy->private, &old->private);
 	trust_anchors_copy(&copy->trust_anchors, &old->trust_anchors);
 	br_x509_minimal_init_full(&copy->minimal, copy->trust_anchors.array, copy->trust_anchors.used);
 	br_ssl_engine_set_x509(&copy->context.eng, &copy->minimal.vtable);
@@ -904,8 +946,7 @@ static int ssl_client_free(pTHX_ SV* sv, MAGIC* magic) {
 	struct ssl_client* self = (struct ssl_client*)magic->mg_ptr;
 
 	trust_anchors_destroy(&self->trust_anchors);
-	private_key_destroy(&self->private_key);
-	certificate_chain_destroy(&self->chain);
+	private_certificate_destroy(&self->private);
 
 	return 0;
 }
@@ -917,8 +958,7 @@ static const MGVTBL Crypt__Bear__SSL__Client_magic = {
 
 typedef struct ssl_server {
 	br_ssl_server_context context;
-	struct certificate_chain chain;
-	struct private_key private_key;
+	struct private_certificate private;
 	unsigned char buffer[BR_SSL_BUFSIZE_BIDI];
 } *Crypt__Bear__SSL__Server;
 
@@ -927,8 +967,7 @@ static int ssl_server_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
 	struct ssl_server* old = (struct ssl_server*)magic->mg_ptr;
 	struct ssl_server* copy = safemalloc(sizeof *copy);
 
-	certificate_chain_copy(&copy->chain, &old->chain);
-	private_key_copy(&copy->private_key, &old->private_key);
+	private_certificate_copy(&copy->private, &old->private);
 	ssl_engine_buffer_move(&copy->context.eng, &old->context.eng, copy->buffer);
 
 	return 0;
@@ -936,10 +975,7 @@ static int ssl_server_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
 
 static int ssl_server_free(pTHX_ SV* sv, MAGIC* magic) {
 	struct ssl_server* self = (struct ssl_server*)magic->mg_ptr;
-
-	private_key_destroy(&self->private_key);
-	certificate_chain_destroy(&self->chain);
-
+	private_certificate_destroy(&self->private);
 	return 0;
 }
 
@@ -1836,6 +1872,33 @@ OUTPUT:
 	RETVAL
 
 
+
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::SSL::PrivateCertificate PREFIX = br_ssl_private_certificate_
+
+Crypt::Bear::SSL::PrivateCertificate br_ssl_private_certificate_new(class, Crypt::Bear::X509::Certificate::Chain certs, Crypt::Bear::X509::PrivateKey key, usage_type usage = both)
+CODE:
+	RETVAL = safemalloc(sizeof *RETVAL);
+	certificate_chain_copy(&RETVAL->chain, certs);
+	private_key_copy(&RETVAL->key, key);
+	RETVAL->usage = usage;
+OUTPUT:
+	RETVAL
+
+Crypt::Bear::X509::Certificate::Chain br_ssl_private_certificate_chain(Crypt::Bear::SSL::PrivateCertificate self)
+CODE:
+	RETVAL = safemalloc(sizeof *RETVAL);
+	certificate_chain_copy(RETVAL, &self->chain);
+OUTPUT:
+	RETVAL
+
+Crypt::Bear::X509::PrivateKey br_ssl_private_certificate_key(Crypt::Bear::SSL::PrivateCertificate self)
+CODE:
+	RETVAL = safemalloc(sizeof *RETVAL);
+	private_key_copy(RETVAL, &self->key);
+OUTPUT:
+	RETVAL
+
+
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::SSL::Engine PREFIX = br_ssl_engine_
 
 const char* br_ssl_engine_get_server_name(Crypt::Bear::SSL::Engine self)
@@ -2009,7 +2072,7 @@ CODE:
 	trust_anchors_copy(&RETVAL->trust_anchors, anchors);
 	br_ssl_client_init_full(&RETVAL->context, &RETVAL->minimal, RETVAL->trust_anchors.array, RETVAL->trust_anchors.used);
 	br_ssl_engine_set_buffer(&RETVAL->context.eng, RETVAL->buffer, sizeof RETVAL->buffer, true);
-	certificate_chain_init(&RETVAL->chain);
+	private_certificate_init(&RETVAL->private);
 OUTPUT:
 	RETVAL
 
@@ -2023,15 +2086,14 @@ OUTPUT:
 	RETVAL
 
 
-void br_ssl_client_set_client_certificate(Crypt::Bear::SSL::Client self, Crypt::Bear::X509::Certificate::Chain certs, Crypt::Bear::X509::PrivateKey key, usage_type usage = both)
+void br_ssl_client_set_client_certificate(Crypt::Bear::SSL::Client self, Crypt::Bear::SSL::PrivateCertificate priv_cert)
 CODE:
-	certificate_chain_copy(&self->chain, certs);
+	private_certificate_copy(&self->private, priv_cert);
 
-	private_key_copy(&self->private_key, key);
-	if (key->key_type == BR_KEYTYPE_RSA) {
-		br_ssl_client_set_single_rsa(&self->context, self->chain.array, self->chain.used, &self->private_key.rsa, rsa_pkcs1_sign);
-	} else if (key->key_type == BR_KEYTYPE_EC) {
-		br_ssl_client_set_single_ec(&self->context, self->chain.array, self->chain.used, &self->private_key.ec, usage, certs->signer_key_type, ec_default, ec_sign_default);
+	if (priv_cert->key.key_type == BR_KEYTYPE_RSA) {
+		br_ssl_client_set_single_rsa(&self->context, self->private.chain.array, self->private.chain.used, &self->private.key.rsa, rsa_pkcs1_sign);
+	} else if (priv_cert->key.key_type == BR_KEYTYPE_EC) {
+		br_ssl_client_set_single_ec(&self->context, self->private.chain.array, self->private.chain.used, &self->private.key.ec, self->private.usage, priv_cert->chain.signer_key_type, ec_default, ec_sign_default);
 	} else {
 		Perl_croak(aTHX_ "Invalid private key");
 	}
@@ -2045,16 +2107,15 @@ MODULE = Crypt::Bear PACKAGE = Crypt::Bear::SSL::Server PREFIX = br_ssl_server_
 BOOT:
 	push_isa(Crypt::Bear::SSL::Server, Crypt::Bear::SSL::Engine);
 
-Crypt::Bear::SSL::Server br_ssl_server_new(class, Crypt::Bear::X509::Certificate::Chain certs, Crypt::Bear::X509::PrivateKey key)
+Crypt::Bear::SSL::Server br_ssl_server_new(class, Crypt::Bear::SSL::PrivateCertificate priv_cert)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
-	certificate_chain_copy(&RETVAL->chain, certs);
+	private_certificate_copy(&RETVAL->private, priv_cert);
 
-	private_key_copy(&RETVAL->private_key, key);
-	if (key->key_type == BR_KEYTYPE_RSA) {
-		br_ssl_server_init_full_rsa(&RETVAL->context, RETVAL->chain.array, RETVAL->chain.used, &RETVAL->private_key.rsa);
-	} else if (key->key_type == BR_KEYTYPE_EC) {
-		br_ssl_server_init_full_ec(&RETVAL->context, RETVAL->chain.array, RETVAL->chain.used, certs->signer_key_type, &RETVAL->private_key.ec);
+	if (priv_cert->key.key_type == BR_KEYTYPE_RSA) {
+		br_ssl_server_init_full_rsa(&RETVAL->context, RETVAL->private.chain.array, RETVAL->private.chain.used, &RETVAL->private.key.rsa);
+	} else if (priv_cert->key.key_type == BR_KEYTYPE_EC) {
+		br_ssl_server_init_full_ec(&RETVAL->context, RETVAL->private.chain.array, RETVAL->private.chain.used, priv_cert->chain.signer_key_type, &RETVAL->private.key.ec);
 	} else {
 		Safefree(RETVAL);
 		Perl_croak(aTHX_ "Invalid private key");

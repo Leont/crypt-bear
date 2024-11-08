@@ -44,6 +44,7 @@ Crypt::Bear::X509::Validator T_MAGIC
 Crypt::Bear::X509::Validator::Minimal T_MAGIC
 Crypt::Bear::X509::Validator::KnownKey T_MAGIC
 
+Crypt::Bear::SSL::PrivateCertificate T_MAGICEXT
 Crypt::Bear::SSL::Session T_OPAQUEOBJ
 Crypt::Bear::SSL::Engine T_MAGICEXT_BASE
 Crypt::Bear::SSL::Client T_MAGICEXT

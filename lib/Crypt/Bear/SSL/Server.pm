@@ -9,7 +9,7 @@ use Crypt::Bear;
 
 # ABSTRACT: A sans-io SSL Client in BearSSL
 
-=method new($certificate_chain, $private_key)
+=method new($private_certificate)
 
 =method reset()
 
