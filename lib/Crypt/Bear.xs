@@ -939,6 +939,8 @@ static int ssl_client_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
 	br_ssl_engine_set_x509(&copy->context.eng, &copy->minimal.vtable);
 	ssl_engine_buffer_move(&copy->context.eng, &old->context.eng, copy->buffer);
 
+	magic->mg_ptr = (char*)copy;
+
 	return 0;
 }
 
@@ -947,6 +949,8 @@ static int ssl_client_free(pTHX_ SV* sv, MAGIC* magic) {
 
 	trust_anchors_destroy(&self->trust_anchors);
 	private_certificate_destroy(&self->private);
+
+	Safefree(self);
 
 	return 0;
 }
@@ -970,12 +974,15 @@ static int ssl_server_dup(pTHX_ MAGIC* magic, CLONE_PARAMS* params) {
 	private_certificate_copy(&copy->private, &old->private);
 	ssl_engine_buffer_move(&copy->context.eng, &old->context.eng, copy->buffer);
 
+	magic->mg_ptr = (char*)copy;
+
 	return 0;
 }
 
 static int ssl_server_free(pTHX_ SV* sv, MAGIC* magic) {
 	struct ssl_server* self = (struct ssl_server*)magic->mg_ptr;
 	private_certificate_destroy(&self->private);
+	Safefree(self);
 	return 0;
 }
 
