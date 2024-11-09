@@ -8,7 +8,7 @@ my %args;
 
 load_module('Dist::Build::XS');
 
-my $use_system = 1;
+my $use_system = 0;
 if ($use_system) {
 	$args{libraries} = [ 'bearssl' ]
 } else {
