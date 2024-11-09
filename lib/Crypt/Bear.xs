@@ -5,9 +5,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#define NEED_mg_findext
-#include "ppport.h"
-
 /* Generic stuff */
 
 typedef struct {
