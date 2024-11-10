@@ -11,11 +11,11 @@ Crypt::Bear::Hash T_OPAQUEOBJ
 Crypt::Bear::HMAC::Key T_OPAQUEOBJ
 Crypt::Bear::HMAC T_OPAQUEOBJ
 Crypt::Bear::PRNG T_OPAQUEOBJ
-Crypt::Bear::PRNG::HMAC_DRBG T_OPAQUEOBJ
+Crypt::Bear::HMAC::DRBG T_OPAQUEOBJ
 Crypt::Bear::HKDF T_OPAQUEOBJ
 Crypt::Bear::Shake T_OPAQUEOBJ
 
-Crypt::Bear::PRNG::AES_DRBG T_OPAQUEOBJ
+Crypt::Bear::AES_CTR::DRBG T_OPAQUEOBJ
 Crypt::Bear::CBC::Enc T_OPAQUEOBJ
 Crypt::Bear::CBC::Dec T_OPAQUEOBJ
 Crypt::Bear::CTR T_OPAQUEOBJ

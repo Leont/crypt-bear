@@ -1,4 +1,4 @@
-package Crypt::Bear::PRNG::HMAC_DRBG;
+package Crypt::Bear::HMAC::DRBG;
 
 use Crypt::Bear;
 

@@ -248,8 +248,8 @@ static const char* system_seeder_name;
 #define br_hmac_drbg_digest br_hmac_drbg_get_hash
 
 typedef const br_prng_class** Crypt__Bear__PRNG;
-typedef br_hmac_drbg_context* Crypt__Bear__PRNG__HMAC_DRBG;
-typedef br_aesctr_drbg_context* Crypt__Bear__PRNG__AES_DRBG;
+typedef br_hmac_drbg_context* Crypt__Bear__HMAC__DRBG;
+typedef br_aesctr_drbg_context* Crypt__Bear__AES_CTR__DRBG;
 
 
 /* RSA stuff */
@@ -1358,26 +1358,26 @@ OUTPUT:
 	RETVAL
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::PRNG::HMAC_DRBG PREFIX = br_hmac_drbg_
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::HMAC::DRBG PREFIX = br_hmac_drbg_
 BOOT:
-	push_isa(Crypt::Bear::PRNG::HMAC_DRBG, Crypt::Bear::PRNG);
+	push_isa(Crypt::Bear::HMAC::DRBG, Crypt::Bear::PRNG);
 
-Crypt::Bear::PRNG::HMAC_DRBG br_hmac_drbg_new(class, hash_type hash, const char* seed, size_t length(seed))
+Crypt::Bear::HMAC::DRBG br_hmac_drbg_new(class, hash_type hash, const char* seed, size_t length(seed))
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	br_hmac_drbg_init(RETVAL, hash, seed, STRLEN_length_of_seed);
 OUTPUT:
 	RETVAL
 
-hash_type br_hmac_drbg_digest(Crypt::Bear::PRNG::HMAC_DRBG self)
+hash_type br_hmac_drbg_digest(Crypt::Bear::HMAC::DRBG self)
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::PRNG::AES_DRBG PREFIX = br_aesctr_drbg_
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::AES_CTR::DRBG PREFIX = br_aesctr_drbg_
 BOOT:
-	push_isa(Crypt::Bear::PRNG::AES_DRBG, Crypt::Bear::PRNG);
+	push_isa(Crypt::Bear::AES_CTR::DRBG, Crypt::Bear::PRNG);
 
 
-Crypt::Bear::PRNG::AES_DRBG br_aesctr_drbg_new(class, const char* seed, size_t length(seed))
+Crypt::Bear::AES_CTR::DRBG br_aesctr_drbg_new(class, const char* seed, size_t length(seed))
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	br_aesctr_drbg_init(RETVAL, aes_ctr, seed, STRLEN_length_of_seed);
