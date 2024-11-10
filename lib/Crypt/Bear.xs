@@ -1159,9 +1159,10 @@ CODE:
 	if (STRLEN_length_of_iv != br_block_cbcenc_block_size(self))
 		Perl_croak(aTHX_ "IV should be %u bytes", br_block_cbcenc_block_size(self));
 
-	SV* iv_copy = sv_2mortal(newSVpvn(iv, STRLEN_length_of_iv));
+	char iv_copy[STRLEN_length_of_iv];
+	memcpy(iv_copy, iv, STRLEN_length_of_iv);
 	RETVAL = newSVpvn(data, STRLEN_length_of_data);
-	((*self)->run)(self, SvPV_nolen(iv_copy), SvPV_nolen(RETVAL), STRLEN_length_of_data);
+	((*self)->run)(self, iv_copy, SvPV_nolen(RETVAL), STRLEN_length_of_data);
 OUTPUT:
 	RETVAL
 
@@ -1177,9 +1178,10 @@ CODE:
 	if (STRLEN_length_of_iv != br_block_cbcdec_block_size(self))
 		Perl_croak(aTHX_ "IV should be %u bytes", br_block_cbcdec_block_size(self));
 
-	SV* iv_copy = sv_2mortal(newSVpvn(iv, STRLEN_length_of_iv));
+	char iv_copy[STRLEN_length_of_iv];
+	memcpy(iv_copy, iv, STRLEN_length_of_iv);
 	RETVAL = newSVpvn(data, STRLEN_length_of_data);
-	((*self)->run)(self, SvPV_nolen(iv_copy), SvPV_nolen(RETVAL), STRLEN_length_of_data);
+	((*self)->run)(self, iv_copy, SvPV_nolen(RETVAL), STRLEN_length_of_data);
 OUTPUT:
 	RETVAL
 
@@ -1195,9 +1197,10 @@ CODE:
 	if (STRLEN_length_of_iv != br_block_ctr_block_size(self))
 		Perl_croak(aTHX_ "IV should be %u bytes", br_block_ctr_block_size(self));
 
-	SV* iv_copy = sv_2mortal(newSVpvn(iv, STRLEN_length_of_iv));
+	char iv_copy[STRLEN_length_of_iv];
+	memcpy(iv_copy, iv, STRLEN_length_of_iv);
 	RETVAL = newSVpvn(data, STRLEN_length_of_data);
-	((*self)->run)(self, SvPV_nolen(iv_copy), counter, SvPV_nolen(RETVAL), STRLEN_length_of_data);
+	((*self)->run)(self, iv_copy, counter, SvPV_nolen(RETVAL), STRLEN_length_of_data);
 OUTPUT:
 	RETVAL
 
