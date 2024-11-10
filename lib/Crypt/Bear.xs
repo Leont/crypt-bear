@@ -1533,7 +1533,7 @@ PPCODE:
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::PEM PREFIX = br_pem_
 
-SV* br_pem_pem_encode(const char* data, size_t length(data), const char* banner, ...)
+SV* br_pem_pem_encode(const char* banner, const char* data, size_t length(data), ...)
 CODE:
 	unsigned flags = 0;
 	for (int i = 3; i < items; i++) {

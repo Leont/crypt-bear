@@ -13,7 +13,7 @@ use Crypt::Bear;
 
 # ABSTRACT: A decoder for PEM
 
-=func pem_encode($data, $banner, @flags)
+=func pem_encode($banner, $data, @flags)
 
 This PEM encodes some piece of C<$data> with the given C<$banner>. If flags are given they will affect the output. Valid values are:
 

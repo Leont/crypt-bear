@@ -10,7 +10,7 @@ use Crypt::Bear::PEM::Decoder;
 
 my $payload = 'blablabla';
 
-my $encoded = pem_encode($payload, 'CERTIFICATE');
+my $encoded = pem_encode('CERTIFICATE', $payload);
 
 my ($name, $decoded) = pem_decode($encoded);
 
