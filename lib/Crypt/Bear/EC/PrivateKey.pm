@@ -10,6 +10,8 @@ use Crypt::Bear;
 
 =method generate()
 
+=method ecdsa_sign($hash_type, $hash_value)
+
 =method public_key()
 
 =method curve()

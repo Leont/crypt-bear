@@ -184,7 +184,7 @@ static const map hash_oids = {
 
 #define br_hash_update(hasher, data, length) (hasher->vtable->update)(&hasher->vtable, data, length)
 
-#define br_hash_desc(hasher, field) ((hasher->vtable->desc >> BR_HASHDESC_ ## field ## _OFF) & BR_HASHDESC_ ## field ##_MASK)
+#define br_hash_desc(hasher, field) (((hasher)->vtable->desc >> BR_HASHDESC_ ## field ## _OFF) & BR_HASHDESC_ ## field ##_MASK)
 #define br_hash_output_size(hasher) br_hash_desc(hasher, OUT)
 #define br_hash_state_size(hasher) br_hash_desc(hasher, STATE)
 #define br_hash_digest(hasher) ((self)->vtable)
@@ -340,6 +340,8 @@ typedef br_rsa_private_key* Crypt__Bear__RSA__PrivateKey;
 
 
 /* EC stuff */
+
+static const size_t ecdsa_max_size = 132;
 
 typedef U32 curve_type;
 #define curve_entry_for(name) make_map_int_entry(#name, BR_EC_ ## name)
@@ -1462,6 +1464,23 @@ OUTPUT:
 	RETVAL
 
 
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC PREFIX = br_ec_
+BOOT:
+	ec_default = br_ec_get_default();
+	ec_sign_default = br_ecdsa_sign_asn1_get_default();
+	ec_verify_default = br_ecdsa_vrfy_asn1_get_default();
+
+void br_ec_supported_curves(class)
+PPCODE:
+	for (UV i = 0; i < 31; i++) {
+		if (ec_default->supported_curves & (1 << i)) {
+			union value value = { .integer = i };
+			const entry* entry = map_reverse_find(curves, value);
+			mXPUSHp(entry->key, entry->length);
+		}
+	}
+
+
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC::Key PREFIX = br_ec_public_key_
 
 Crypt::Bear::EC::Key br_ec_public_key_new(curve_type curve, const char* data, size_t length(data))
@@ -1478,6 +1497,16 @@ CODE:
 	RETVAL = self->curve;
 OUTPUT:
 	RETVAL
+
+bool br_ec_public_key_ecdsa_verify(Crypt::Bear::EC::Key self, hash_type hash_name, unsigned char* hash_value, size_t length(hash_value), unsigned char* signature, size_t length(signature))
+CODE:
+	size_t hash_size = ((hash_name->desc >> BR_HASHDESC_OUT_OFF) & BR_HASHDESC_OUT_MASK);
+	if (STRLEN_length_of_hash_value != hash_size)
+		Perl_croak(aTHX_ "Hash is inappropriately sized");
+	RETVAL = ec_verify_default(ec_default, hash_value, hash_size, self, signature, STRLEN_length_of_signature);
+OUTPUT:
+	RETVAL
+
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC::PrivateKey PREFIX = br_ec_private_key_
 
@@ -1514,22 +1543,19 @@ CODE:
 OUTPUT:
 	RETVAL
 
+SV* br_ec_private_key_ecdsa_sign(Crypt::Bear::EC::PrivateKey self, hash_type hash_name, unsigned char* hash_value, size_t length(hash_value))
+CODE:
+	size_t hash_size = ((hash_name->desc >> BR_HASHDESC_OUT_OFF) & BR_HASHDESC_OUT_MASK);
+	if (STRLEN_length_of_hash_value != hash_size)
+		Perl_croak(aTHX_ "Hash is inappropriately sized");
+	RETVAL = make_buffer(ecdsa_max_size);
+	size_t length = ec_sign_default(ec_default, hash_name, hash_value, self, SvPV_nolen(RETVAL));
+	if (!length)
+		Perl_croak(aTHX_ "Could not sign");
+	SvCUR_set(RETVAL, length);
+OUTPUT:
+	RETVAL
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC PREFIX = br_ec_
-BOOT:
-	ec_default = br_ec_get_default();
-	br_ecdsa_sign ec_sign_default = br_ecdsa_sign_asn1_get_default();
-	br_ecdsa_vrfy ec_verify_default = br_ecdsa_vrfy_asn1_get_default();
-
-void br_ec_supported_curves(class)
-PPCODE:
-	for (UV i = 0; i < 31; i++) {
-		if (ec_default->supported_curves & (1 << i)) {
-			union value value = { .integer = i };
-			const entry* entry = map_reverse_find(curves, value);
-			mXPUSHp(entry->key, entry->length);
-		}
-	}
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::PEM PREFIX = br_pem_
 

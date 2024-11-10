@@ -8,4 +8,6 @@ use Crypt::Bear;
 
 =method new($curve, $point)
 
+=method ecdsa_verify($hash_type, $hash_value, $signature)
+
 =method curve()
