@@ -1,4 +1,4 @@
-package Crypt::Bear::EC::Key;
+package Crypt::Bear::EC::PublicKey;
 
 use Crypt::Bear;
 

@@ -406,7 +406,7 @@ static int ec_key_free(pTHX_ SV* sv, MAGIC* magic) {
 	return 0;
 }
 
-static const MGVTBL Crypt__Bear__EC__Key_magic = {
+static const MGVTBL Crypt__Bear__EC__PublicKey_magic = {
 	.svt_dup = ec_key_dup,
 	.svt_free = ec_key_free,
 };
@@ -444,7 +444,7 @@ static const br_ec_impl* ec_c25519;
 static br_ecdsa_sign ec_sign_default;
 static br_ecdsa_vrfy ec_verify_default;
 
-typedef br_ec_public_key* Crypt__Bear__EC__Key;
+typedef br_ec_public_key* Crypt__Bear__EC__PublicKey;
 typedef br_ec_private_key* Crypt__Bear__EC__PrivateKey;
 typedef const br_ec_impl* Crypt__Bear__EC;
 
@@ -623,7 +623,7 @@ static SV* S_x509_key_unpack(pTHX_ const br_x509_pkey* public_key) {
 	} else if (public_key->key_type == BR_KEYTYPE_EC) {
 		br_ec_public_key* key = safemalloc(sizeof *key);
 		ec_key_copy(key, &public_key->key.ec);
-		return make_magic(key, "Crypt::Bear::EC::Key", &Crypt__Bear__EC__Key_magic);
+		return make_magic(key, "Crypt::Bear::EC::PublicKey", &Crypt__Bear__EC__PublicKey_magic);
 	}
 	return &PL_sv_undef;
 }
@@ -1481,9 +1481,9 @@ PPCODE:
 	}
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC::Key PREFIX = br_ec_public_key_
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EC::PublicKey PREFIX = br_ec_public_key_
 
-Crypt::Bear::EC::Key br_ec_public_key_new(curve_type curve, const char* data, size_t length(data))
+Crypt::Bear::EC::PublicKey br_ec_public_key_new(curve_type curve, const char* data, size_t length(data))
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	RETVAL->curve = curve;
@@ -1492,13 +1492,13 @@ CODE:
 OUTPUT:
 	RETVAL
 
-curve_type br_ec_public_key_curve(Crypt::Bear::EC::Key self)
+curve_type br_ec_public_key_curve(Crypt::Bear::EC::PublicKey self)
 CODE:
 	RETVAL = self->curve;
 OUTPUT:
 	RETVAL
 
-bool br_ec_public_key_ecdsa_verify(Crypt::Bear::EC::Key self, hash_type hash_name, unsigned char* hash_value, size_t length(hash_value), unsigned char* signature, size_t length(signature))
+bool br_ec_public_key_ecdsa_verify(Crypt::Bear::EC::PublicKey self, hash_type hash_name, unsigned char* hash_value, size_t length(hash_value), unsigned char* signature, size_t length(signature))
 CODE:
 	size_t hash_size = ((hash_name->desc >> BR_HASHDESC_OUT_OFF) & BR_HASHDESC_OUT_MASK);
 	if (STRLEN_length_of_hash_value != hash_size)
@@ -1534,7 +1534,7 @@ CODE:
 OUTPUT:
 	RETVAL
 
-Crypt::Bear::EC::Key br_ec_private_key_public_key(Crypt::Bear::EC::PrivateKey self)
+Crypt::Bear::EC::PublicKey br_ec_private_key_public_key(Crypt::Bear::EC::PrivateKey self)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	size_t length = br_ec_compute_pub(ec_default, RETVAL, NULL, self);
@@ -1556,7 +1556,7 @@ CODE:
 OUTPUT:
 	RETVAL
 
-SV* br_ec_private_key_ecdh_key_exchange(Crypt::Bear::EC::PrivateKey self, Crypt::Bear::EC::Key other)
+SV* br_ec_private_key_ecdh_key_exchange(Crypt::Bear::EC::PrivateKey self, Crypt::Bear::EC::PublicKey other)
 CODE:
 	if (self->curve != other->curve)
 		Perl_croak(aTHX_ "Keys must be on same curve for EC key exchange");

@@ -35,7 +35,7 @@ The (encoded) DN of the certificate.
 
 =method public_key()
 
-The public key of the certificate. This will either be a L<Crypt::Bear::RSA::PublicKey> or an L<Crypt::Bear::EC::Key>.
+The public key of the certificate. This will either be a L<Crypt::Bear::RSA::PublicKey> or a L<Crypt::Bear::EC::PublicKey>.
 
 =method is_ca()
 
