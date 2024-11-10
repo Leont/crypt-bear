@@ -2084,12 +2084,11 @@ CODE:
 OUTPUT:
 	RETVAL
 
-SV* br_ssl_engine_pull_send(Crypt::Bear::SSL::Engine self, bool flush = false)
+SV* br_ssl_engine_pull_send(Crypt::Bear::SSL::Engine self, bool force = false)
 CODE:
 	RETVAL = newSVpvn("", 0);
 
-	if (flush)
-		br_ssl_engine_flush(self, true);
+	br_ssl_engine_flush(self, force);
 
 	while (br_ssl_engine_current_state(self) & BR_SSL_SENDREC) {
 		size_t len = 0;
