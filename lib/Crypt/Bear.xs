@@ -1129,7 +1129,7 @@ OUTPUT:
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::Shake PREFIX = br_shake_
 
 #if 0
-Crypt::Bear::Shake new(class, hash_type hash, UV security_level)
+Crypt::Bear::Shake br_shake_new(class, hash_type hash, UV security_level)
 CODE:
 OUTPUT:
 	RETVAL
@@ -1138,7 +1138,7 @@ void br_shake_inject(Crypt::Bear::Shake self, const char* data, size_t length(da
 
 void br_shake_flip(Crypt::Bear::Shake self)
 
-SV* produce(Crypt::Bear::Shake self, const char* info, size_t length(info))
+SV* br_shake_produce(Crypt::Bear::Shake self, const char* info, size_t length(info))
 CODE:
 	RETVAL = make_buffer(output_size);
 	br_shake_produce(self, info, STRLEN_length_of_info, SvPV_nolen(RETVAL), output_size);
@@ -1254,17 +1254,17 @@ CODE:
 OUTPUT:
 	RETVAL
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::CTRCBC
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::CTRCBC PREFIX = br_block_ctrcbc_
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::AES_CTRCBC
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::AES_CTRCBC PREFIX = br_block_aes_ctrcbc_
 BOOT:
 	push_isa(Crypt::Bear::AES_CTRCBC, Crypt::Bear::CTRCBC);
 	aes_ctrcbc = br_aes_x86ni_ctrcbc_get_vtable();
 	if (!aes_ctrcbc)
 		aes_ctrcbc = &br_aes_ct_ctrcbc_vtable;
 
-Crypt::Bear::AES_CTRCBC new(class, const char* data, size_t length(data))
+Crypt::Bear::AES_CTRCBC br_block_aes_ctrcbc_new(class, const char* data, size_t length(data))
 CODE:
 	RETVAL = safemalloc(aes_ctrcbc->context_size);
 	(aes_ctrcbc->init)(&RETVAL->vtable, data, STRLEN_length_of_data);
@@ -1306,7 +1306,7 @@ OUTPUT:
 	RETVAL
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::GCM
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::GCM PREFIX = br_gcm_
 BOOT:
 	push_isa(Crypt::Bear::GCM, Crypt::Bear::AEAD);
 	ghash_impl = br_ghash_pclmul_get();
@@ -1318,7 +1318,7 @@ BOOT:
 #endif
 
 
-Crypt::Bear::GCM new(class, Crypt::Bear::CTR ctr)
+Crypt::Bear::GCM br_gcm_new(class, Crypt::Bear::CTR ctr)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	br_gcm_init(RETVAL, ctr, ghash_impl);
@@ -1326,11 +1326,11 @@ OUTPUT:
 	RETVAL
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EAX
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::EAX PREFIX = br_eax_
 BOOT:
 	push_isa(Crypt::Bear::EAX, Crypt::Bear::AEAD);
 
-Crypt::Bear::EAX new(class, Crypt::Bear::CTRCBC ctrcbc)
+Crypt::Bear::EAX br_eax_new(class, Crypt::Bear::CTRCBC ctrcbc)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	br_eax_init(RETVAL, ctrcbc);
@@ -1338,11 +1338,11 @@ OUTPUT:
 	RETVAL
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::CCM
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::CCM PREFIX = br_ccm_
 BOOT:
 	push_isa(Crypt::Bear::CCM, Crypt::Bear::AEAD);
 
-Crypt::Bear::CCM new(class, Crypt::Bear::CTRCBC ctrcbc)
+Crypt::Bear::CCM br_ccm_new(class, Crypt::Bear::CTRCBC ctrcbc)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	br_ccm_init(RETVAL, ctrcbc);
@@ -1878,7 +1878,7 @@ MODULE = Crypt::Bear PACKAGE = Crypt::Bear::X509::Validator::Minimal PREFIX = br
 BOOT:
 	push_isa(Crypt::Bear::X509::Validator::Minimal, Crypt::Bear::X509::Validator);
 
-Crypt::Bear::X509::Validator::Minimal new(SV* class, Crypt::Bear::X509::TrustAnchors anchors)
+Crypt::Bear::X509::Validator::Minimal br_x509_minimal_new(SV* class, Crypt::Bear::X509::TrustAnchors anchors)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	trust_anchors_copy(&RETVAL->anchors, anchors);
