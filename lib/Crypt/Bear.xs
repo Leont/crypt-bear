@@ -18,7 +18,7 @@ typedef struct {
 typedef entry map[];
 
 #define make_map_int_entry(name, result) { STR_WITH_LEN(name), (union value) { .integer = result } }
-#define make_map_pointer_entry(name, result) { STR_WITH_LEN(#name), (union value) { .pointer = result } }
+#define make_map_pointer_entry(name, result) { STR_WITH_LEN(name), (union value) { .pointer = result } }
 
 static const entry* S_map_find(pTHX_ const map table, size_t table_size, const char* name, size_t name_length) {
 	size_t i;
@@ -151,7 +151,7 @@ static const char* S_lookup_error(pTHX_ int error) {
 
 /* Hash stuff */
 
-#define hash_entry_for(name) make_map_pointer_entry(name, (&br_ ## name ## _vtable))
+#define hash_entry_for(name) make_map_pointer_entry(#name, (&br_ ## name ## _vtable))
 
 static const map hashs = {
 	hash_entry_for(sha256),
@@ -1401,17 +1401,17 @@ PPCODE:
 		SV* public = make_magic(key, "Crypt::Bear::RSA::Key", &Crypt__Bear__RSA__Key_magic);
 		mXPUSHs(public);
 
-		SV* private = make_magic(key, "Crypt::Bear::RSA::PrivateKey", &Crypt__Bear__RSA__PrivateKey_magic);
+		SV* private = make_magic(private_key, "Crypt::Bear::RSA::PrivateKey", &Crypt__Bear__RSA__PrivateKey_magic);
 		mXPUSHs(private);
 	}
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::Key
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::Key PREFIX = br_rsa_public_key_
 BOOT:
 	rsa_pkcs1_verify = br_rsa_pkcs1_vrfy_get_default();
 	rsa_oaep_encrypt = br_rsa_oaep_encrypt_get_default();
 
-SV* pkcs1_verify(Crypt::Bear::RSA::Key self, const unsigned char* signature, size_t length(signature), hash_oid_type hash)
+SV* br_rsa_public_key_pkcs1_verify(Crypt::Bear::RSA::Key self, hash_oid_type hash, const unsigned char* signature, size_t length(signature))
 CODE:
 	RETVAL = make_buffer(hash->length);
 	bool success = rsa_pkcs1_verify(signature, STRLEN_length_of_signature, hash->oid, hash->length, self, (unsigned char*)SvPV_nolen(RETVAL));
@@ -1420,10 +1420,10 @@ CODE:
 OUTPUT:
 	RETVAL
 
-SV* oaep_encrypt(Crypt::Bear::RSA::Key self, Crypt::Bear::PRNG prng, hash_type hash, const char* label, size_t length(label), const char* plain, size_t length(plain), size_t max_data_length = (STRLEN_length_of_label + STRLEN_length_of_plain) * 2)
+SV* br_rsa_public_key_oaep_encrypt(Crypt::Bear::RSA::Key self, hash_type hash, const char* plain, size_t length(plain), Crypt::Bear::PRNG prng, const char* label, size_t length(label))
 CODE:
-	RETVAL = make_buffer(max_data_length);
-	size_t length = rsa_oaep_encrypt(prng, hash, label, STRLEN_length_of_label, self, SvPV_nolen(RETVAL), max_data_length, plain, STRLEN_length_of_plain);
+	RETVAL = make_buffer(self->nlen);
+	size_t length = rsa_oaep_encrypt(prng, hash, label, STRLEN_length_of_label, self, SvPV_nolen(RETVAL), self->nlen, plain, STRLEN_length_of_plain);
 	if (length)
 		SvCUR_set(RETVAL, length);
 	else
@@ -1433,12 +1433,12 @@ OUTPUT:
 
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::PrivateKey
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::PrivateKey PREFIX = br_rsa_private_key_
 BOOT:
 	rsa_pkcs1_sign = br_rsa_pkcs1_sign_get_default();
 	rsa_oaep_decrypt = br_rsa_oaep_decrypt_get_default();
 
-SV* pkcs1_sign(Crypt::Bear::RSA::PrivateKey self, hash_oid_type hash_oid, const unsigned char* hash, size_t length(hash))
+SV* br_rsa_private_key_pkcs1_sign(Crypt::Bear::RSA::PrivateKey self, hash_oid_type hash_oid, const unsigned char* hash, size_t length(hash))
 CODE:
 	if (STRLEN_length_of_hash != hash_oid->length)
 		Perl_croak(aTHX_ "Hash has incorrect length");
@@ -1449,7 +1449,7 @@ CODE:
 OUTPUT:
 	RETVAL
 
-SV* oaep_decrypt(Crypt::Bear::RSA::PrivateKey self, hash_type hash, const char* label, size_t length(label), const char* ciphertext, size_t length(ciphertext))
+SV* br_rsa_private_key_oaep_decrypt(Crypt::Bear::RSA::PrivateKey self, hash_type hash, const char* ciphertext, size_t length(ciphertext), const char* label, size_t length(label))
 CODE:
 	RETVAL = newSVpvn(ciphertext, STRLEN_length_of_ciphertext);
 	size_t len = STRLEN_length_of_ciphertext;

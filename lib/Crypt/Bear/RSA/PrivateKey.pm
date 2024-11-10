@@ -6,6 +6,6 @@ use Crypt::Bear;
 
 # ABSTRACT: An RSA private key in BearSSL
 
-=method oaep_decrypt($digest, $label, $ciphertext)
+=method oaep_decrypt($digest, $ciphertext, $label)
 
 =method pkcs1_sign($digest, $hash)

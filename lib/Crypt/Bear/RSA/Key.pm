@@ -6,6 +6,6 @@ use Crypt::Bear;
 
 # ABSTRACT: An RSA public key in BearSSL
 
-=method oaep_encrypt($prng, $digest, $label, $plaintext)
+=method oaep_encrypt($digest, $plaintext, $prng, $label)
 
-=method pkcs1_verify($signature, $digest)
+=method pkcs1_verify($digest, $signature)
