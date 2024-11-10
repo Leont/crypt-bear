@@ -1991,31 +1991,11 @@ CODE:
 OUTPUT:
 	RETVAL
 
-bool br_ssl_engine_sendapp_ready(Crypt::Bear::SSL::Engine self)
+bool br_ssl_engine_send_ready(Crypt::Bear::SSL::Engine self)
 CODE:
 	RETVAL = cBOOL(br_ssl_engine_current_state(self) & BR_SSL_SENDAPP);
 OUTPUT:
 	RETVAL
-
-#if 0
-bool br_ssl_engine_sendrec_ready(Crypt::Bear::SSL::Engine self)
-CODE:
-	RETVAL = cBOOL(br_ssl_engine_current_state(self) & BR_SSL_SENDREC);
-OUTPUT:
-	RETVAL
-
-bool br_ssl_engine_recvapp_ready(Crypt::Bear::SSL::Engine self)
-CODE:
-	RETVAL = cBOOL(br_ssl_engine_current_state(self) & BR_SSL_RECVAPP);
-OUTPUT:
-	RETVAL
-
-bool br_ssl_engine_recvrec_ready(Crypt::Bear::SSL::Engine self)
-CODE:
-	RETVAL = cBOOL(br_ssl_engine_current_state(self) & BR_SSL_RECVREC);
-OUTPUT:
-	RETVAL
-#endif
 
 SV* br_ssl_engine_push_received(Crypt::Bear::SSL::Engine self, unsigned char* data, size_t length(data))
 CODE:

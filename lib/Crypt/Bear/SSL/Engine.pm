@@ -15,7 +15,7 @@ use Crypt::Bear;
 
 =method pull_send($flush = false)
 
-=method sendapp_ready()
+=method send_ready()
 
 =method is_closed()
 

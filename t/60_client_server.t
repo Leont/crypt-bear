@@ -32,7 +32,7 @@ is $server->last_error, 'ok';
 
 ok eval {
 	my $count = 0;
-	while (!$client->sendapp_ready) {
+	while (!$client->send_ready) {
 		die 'Client is dead: ' . $client->last_error if $client->is_closed;
 		die 'Server is dead: ' . $server->last_error if $server->is_closed;
 		my $to_server = $client->pull_send;
