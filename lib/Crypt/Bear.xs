@@ -836,6 +836,18 @@ static const MGVTBL Crypt__Bear__X509__PrivateKey_magic = {
 	.svt_free = private_key_free,
 };
 
+static unsigned S_private_key_usage(pTHX_ struct private_key* key) {
+	if (key->key_type == BR_KEYTYPE_EC) {
+		unsigned result = BR_KEYTYPE_KEYX;
+		if (key->ec.curve == BR_EC_secp256r1 || key->ec.curve == BR_EC_secp384r1 || BR_EC_secp521r1)
+			result |= BR_KEYTYPE_SIGN;
+		return result;
+	} else {
+		return BR_KEYTYPE_SIGN;
+	}
+}
+#define private_key_usage(key) S_private_key_usage(aTHX_ key)
+
 typedef const br_x509_class** Crypt__Bear__X509__Validator;
 
 typedef struct validator_minimal {
@@ -994,7 +1006,7 @@ static const MGVTBL Crypt__Bear__SSL__Server_magic = {
 /* DIRTY STUFF */
 
 // Make various default values pretty for XS's error messages
-#define both (BR_KEYTYPE_SIGN | BR_KEYTYPE_KEYX)
+#define automatic private_key_usage(key)
 #define undef &PL_sv_undef
 
 // Unicode stuff. This will force byte semantics on all string
@@ -1923,7 +1935,7 @@ OUTPUT:
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::SSL::PrivateCertificate PREFIX = br_ssl_private_certificate_
 
-Crypt::Bear::SSL::PrivateCertificate br_ssl_private_certificate_new(class, Crypt::Bear::X509::Certificate::Chain certs, Crypt::Bear::X509::PrivateKey key, usage_type usage = both)
+Crypt::Bear::SSL::PrivateCertificate br_ssl_private_certificate_new(class, Crypt::Bear::X509::Certificate::Chain certs, Crypt::Bear::X509::PrivateKey key, usage_type usage = automatic)
 CODE:
 	RETVAL = safemalloc(sizeof *RETVAL);
 	certificate_chain_copy(&RETVAL->chain, certs);
