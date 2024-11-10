@@ -1,4 +1,4 @@
-package Crypt::Bear::RSA::Key;
+package Crypt::Bear::RSA::PublicKey;
 
 use Crypt::Bear;
 

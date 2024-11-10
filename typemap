@@ -29,7 +29,7 @@ Crypt::Bear::GCM T_OPAQUEOBJ
 Crypt::Bear::EAX T_OPAQUEOBJ
 Crypt::Bear::CCM T_OPAQUEOBJ
 
-Crypt::Bear::RSA::Key T_MAGICEXT
+Crypt::Bear::RSA::PublicKey T_MAGICEXT
 Crypt::Bear::RSA::PrivateKey T_MAGICEXT
 Crypt::Bear::EC::Key T_MAGICEXT
 Crypt::Bear::EC::PrivateKey T_MAGICEXT

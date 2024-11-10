@@ -287,12 +287,12 @@ static int rsa_key_free(pTHX_ SV* sv, MAGIC* magic) {
 	return 0;
 }
 
-static const MGVTBL Crypt__Bear__RSA__Key_magic = {
+static const MGVTBL Crypt__Bear__RSA__PublicKey_magic = {
 	.svt_dup = rsa_key_dup,
 	.svt_free = rsa_key_free,
 };
 
-typedef br_rsa_public_key* Crypt__Bear__RSA__Key;
+typedef br_rsa_public_key* Crypt__Bear__RSA__PublicKey;
 
 static void S_rsa_private_key_copy(pTHX_ br_rsa_private_key* dest, const br_rsa_private_key* source) {
 	char* buffer = safemalloc(source->plen + source->qlen + source->dplen + source->dqlen + source->iqlen);
@@ -619,7 +619,7 @@ static SV* S_x509_key_unpack(pTHX_ const br_x509_pkey* public_key) {
 	if (public_key->key_type == BR_KEYTYPE_RSA) {
 		br_rsa_public_key* key = safemalloc(sizeof *key);
 		rsa_key_copy(key, &public_key->key.rsa);
-		return make_magic(key, "Crypt::Bear::RSA::Key", &Crypt__Bear__RSA__Key_magic);
+		return make_magic(key, "Crypt::Bear::RSA::PublicKey", &Crypt__Bear__RSA__PublicKey_magic);
 	} else if (public_key->key_type == BR_KEYTYPE_EC) {
 		br_ec_public_key* key = safemalloc(sizeof *key);
 		ec_key_copy(key, &public_key->key.ec);
@@ -1400,7 +1400,7 @@ PPCODE:
 	bool success = rsa_keygen(prng, private_key, private_buffer, key, public_buffer, size, exponent);
 
 	if (success) {
-		SV* public = make_magic(key, "Crypt::Bear::RSA::Key", &Crypt__Bear__RSA__Key_magic);
+		SV* public = make_magic(key, "Crypt::Bear::RSA::PublicKey", &Crypt__Bear__RSA__PublicKey_magic);
 		mXPUSHs(public);
 
 		SV* private = make_magic(private_key, "Crypt::Bear::RSA::PrivateKey", &Crypt__Bear__RSA__PrivateKey_magic);
@@ -1408,12 +1408,12 @@ PPCODE:
 	}
 
 
-MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::Key PREFIX = br_rsa_public_key_
+MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::PublicKey PREFIX = br_rsa_public_key_
 BOOT:
 	rsa_pkcs1_verify = br_rsa_pkcs1_vrfy_get_default();
 	rsa_oaep_encrypt = br_rsa_oaep_encrypt_get_default();
 
-SV* br_rsa_public_key_pkcs1_verify(Crypt::Bear::RSA::Key self, hash_oid_type hash, const unsigned char* signature, size_t length(signature))
+SV* br_rsa_public_key_pkcs1_verify(Crypt::Bear::RSA::PublicKey self, hash_oid_type hash, const unsigned char* signature, size_t length(signature))
 CODE:
 	RETVAL = make_buffer(hash->length);
 	bool success = rsa_pkcs1_verify(signature, STRLEN_length_of_signature, hash->oid, hash->length, self, (unsigned char*)SvPV_nolen(RETVAL));
@@ -1422,7 +1422,7 @@ CODE:
 OUTPUT:
 	RETVAL
 
-SV* br_rsa_public_key_oaep_encrypt(Crypt::Bear::RSA::Key self, hash_type hash, const char* plain, size_t length(plain), Crypt::Bear::PRNG prng, const char* label, size_t length(label))
+SV* br_rsa_public_key_oaep_encrypt(Crypt::Bear::RSA::PublicKey self, hash_type hash, const char* plain, size_t length(plain), Crypt::Bear::PRNG prng, const char* label, size_t length(label))
 CODE:
 	RETVAL = make_buffer(self->nlen);
 	size_t length = rsa_oaep_encrypt(prng, hash, label, STRLEN_length_of_label, self, SvPV_nolen(RETVAL), self->nlen, plain, STRLEN_length_of_plain);
