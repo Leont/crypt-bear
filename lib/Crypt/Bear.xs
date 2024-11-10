@@ -187,7 +187,7 @@ static const map hash_oids = {
 #define br_hash_desc(hasher, field) ((hasher->vtable->desc >> BR_HASHDESC_ ## field ## _OFF) & BR_HASHDESC_ ## field ##_MASK)
 #define br_hash_output_size(hasher) br_hash_desc(hasher, OUT)
 #define br_hash_state_size(hasher) br_hash_desc(hasher, STATE)
-#define br_hash_id(hasher) br_hash_desc(hasher, ID)
+#define br_hash_digest(hasher) ((self)->vtable)
 static br_ghash ghash_impl;
 #define br_hmac_key_digest br_hmac_key_get_digest
 #define br_hmac_digest br_hmac_get_digest
@@ -1052,7 +1052,7 @@ CODE:
 		Perl_croak(aTHX_ "State hash wrong size");
 	(self->vtable->set_state)(&self->vtable, state, STRLEN_length_of_state);
 
-IV br_hash_id(Crypt::Bear::Hash self)
+hash_type br_hash_digest(Crypt::Bear::Hash self)
 
 UV br_hash_output_size(Crypt::Bear::Hash self)
 

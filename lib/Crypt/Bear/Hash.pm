@@ -46,7 +46,7 @@ Restore a previous state.
 
 The size of the output of this hash.
 
-=method id()
+=method digest()
 
 Returns the SSL identifier for this hash.
 
