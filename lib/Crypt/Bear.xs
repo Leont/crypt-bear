@@ -1104,7 +1104,7 @@ void br_hkdf_inject(Crypt::Bear::HKDF self, const char* data, size_t length(data
 
 void br_hkdf_flip(Crypt::Bear::HKDF self)
 
-SV* br_hkdf_produce(Crypt::Bear::HKDF self, const char* info, size_t length(info), size_t output_size)
+SV* br_hkdf_produce(Crypt::Bear::HKDF self, size_t output_size, const char* info, size_t length(info))
 CODE:
 	RETVAL = make_buffer(output_size);
 	br_hkdf_produce(self, info, STRLEN_length_of_info, SvPV_nolen(RETVAL), output_size);

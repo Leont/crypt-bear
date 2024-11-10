@@ -12,4 +12,4 @@ use Crypt::Bear;
 
 =method flip()
 
-=method produce($info, $output_size)
+=method produce($output_size, $info)
