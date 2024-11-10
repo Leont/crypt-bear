@@ -1556,6 +1556,24 @@ CODE:
 OUTPUT:
 	RETVAL
 
+SV* br_ec_private_key_ecdh_key_exchange(Crypt::Bear::EC::PrivateKey self, Crypt::Bear::EC::Key other)
+CODE:
+	if (self->curve != other->curve)
+		Perl_croak(aTHX_ "Keys must be on same curve for EC key exchange");
+
+	size_t out_length = 0;
+	(ec_default->generator)(self->curve, &out_length);
+	RETVAL = make_buffer(out_length);
+	memcpy(SvPV_nolen(RETVAL), other->q, other->qlen);
+
+	(ec_default->mul)(SvPV_nolen(RETVAL), other->qlen, self->x, self->xlen, self->curve);
+	size_t xoff, xlen;
+	xoff = ec_default->xoff(self->curve, &xlen);
+	if (xoff)
+		sv_chop(RETVAL, SvPV_nolen(RETVAL) + xoff);
+	SvCUR_set(RETVAL, xlen);
+OUTPUT:
+	RETVAL
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::PEM PREFIX = br_pem_
 

@@ -28,4 +28,11 @@ ok $signature;
 ok $public->ecdsa_verify($digest, $hash, $signature);
 
 
+my $private2 = Crypt::Bear::EC::PrivateKey->generate('secp256r1', $prng);
+my $public2 = $private2->public_key;
+
+my $left_side = $private->ecdh_key_exchange($public2);
+my $right_side = $private2->ecdh_key_exchange($public);
+is unpack("H*", $left_side), unpack("H*", $right_side);
+
 done_testing;
