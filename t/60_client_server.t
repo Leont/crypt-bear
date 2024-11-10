@@ -56,4 +56,10 @@ my $rec2 = $server->push_send($payload2, !!1);
 my $decoded2 = $client->push_received($rec2);
 is $decoded2, $payload2;
 
+$client->close;
+is $server->push_received($client->pull_send), '';
+is $client->push_received($server->pull_send), '';
+ok $server->is_closed;
+ok $client->is_closed;
+
 done_testing;
