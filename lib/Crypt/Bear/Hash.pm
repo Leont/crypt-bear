@@ -6,9 +6,21 @@ use Crypt::Bear;
 
 # ABSTRACT: hash implementations in BearSSL
 
-=method new($hash_name)
+=head1 SYNOPSIS
 
-This creates a new hasher. The hash name must be one of the following.
+ my $digester = Crypt::Bear::Hash->new('sha226');
+ while(<>) {
+     $digester->update($_);
+ }
+ say unpack 'H*', $digester->out;
+
+=head1 DESCRIPTION
+
+This represents a streaming implementation of common hash functions.
+
+=method new($digest)
+
+This creates a new hasher. The digest name must be one of the following.
 
 =over 4
 
@@ -28,19 +40,19 @@ This creates a new hasher. The hash name must be one of the following.
 
 =method update(data)
 
-This feeds data to the hasher.
+Add some more bytes to the hash computation represented by the provided context.
 
 =method out()
 
-This returns the hash based on the current state.
+This returns the hash based on the current state. The context is NOT modified by this operation, so this function can be used to get a "partial hash" while still keeping the possibility of adding more bytes to the input.
 
 =method state()
 
-Retrieve the current state.
+Get a copy of the "current state" for the computation so far. For MD functions (MD5, SHA-1, SHA-2 family), this is the running state resulting from the processing of the last complete input block.
 
 =method set_state($state)
 
-Restore a previous state.
+Set the internal state to the provided values. C<$state> shall match that which was obtained from C<state()>. This restores the hash state only if the state values were at an appropriate block boundary.
 
 =method output_size()
 
@@ -48,6 +60,4 @@ The size of the output of this hash.
 
 =method digest()
 
-Returns the SSL identifier for this hash.
-
-1;
+Returns the digest name for this hash.

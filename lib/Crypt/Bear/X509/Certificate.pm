@@ -21,6 +21,14 @@ sub load {
 
 # ABSTRACT: A X509 certificate in BearSSL
 
+=head1 SYNOPSIS
+
+ my $chain = Crypt::Bear::X509::Certificate->load($filename);
+
+=head1 DESCRIPTION
+
+This represents a single certificate.
+
 =method new($encoded)
 
 This decodes a certificate into an object.
@@ -31,7 +39,7 @@ This loads a certificate from the given file, and returns it as a new object.
 
 =method dn()
 
-The (encoded) DN of the certificate.
+The (encoded) distinguished name of the certificate.
 
 =method public_key()
 

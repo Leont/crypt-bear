@@ -41,18 +41,40 @@ sub load_dir {
 
 # ABSTRACT: A set of trust anchors in BearSSL
 
+=head1 SYNOPSIS
+
+ my $anchors = Crypt::Bear::X509::TrustAnchors->new;
+ $anchors->load_dir($dirname);
+ $anchors->load_file($filename);
+
+=head1 DESCRIPTION
+
+This respresents a set of trust anchors. These are either certificate authorities, or end-user certificates explicitly marked as safe
+
 =method new()
 
-=method add($certificate)
+This creates a new (empty) trust anchor set.
+
+=method add($certificate, $is_ca = ...)
+
+This adds a L<certificate|Crypt::Bear::Certificate> to the set. Certificates are usually marked as CA or not, but it allows you to override that should that be desired.
 
 =method load_file($filename)
 
+This loads a file containing one or more certificates, and adds them all to the set.
+
 =method load_dir($directory)
 
-Load all certificates from C<$directory>
+Load all certificates from C<$directory> into the trust root.
 
 =method merge($other)
 
+This merges another anchor set into this one.
+
 =method count()
 
+This returns the number of certificates in the set.
+
 =method names()
+
+This returns the (encoded) distinguished names of the certificates.
