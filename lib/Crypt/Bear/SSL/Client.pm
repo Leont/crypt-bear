@@ -22,7 +22,7 @@ use Crypt::Bear;
      sysread $socket, my $buffer, 1024;
      $buffer .= $client->push_received($buffer);
 
-	 die "Failed to connect" if $client->is_closed;
+     die "Failed to connect" if $client->is_closed;
  }
 
  # now we're connected

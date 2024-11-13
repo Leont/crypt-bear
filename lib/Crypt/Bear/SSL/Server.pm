@@ -18,7 +18,7 @@ use Crypt::Bear;
  while (!$server->send_ready) {
      sysread $socket, my $buffer, 1024;
      $server->push_received($buffer);
-	 die "Failed to connect" if $server->is_closed;
+     die "Failed to connect" if $server->is_closed;
      syswrite $socket, $server->pull_send;
  }
 
