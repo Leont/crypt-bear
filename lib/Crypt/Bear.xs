@@ -460,7 +460,7 @@ static const map pem_flags = {
 
 typedef struct {
 #ifdef MULTIPLICITY
-	pTHX;
+	tTHX aTHX;
 #endif
 	br_pem_decoder_context decoder;
 	SV* callback;
@@ -554,7 +554,7 @@ typedef unsigned key_kind_type;
 
 struct decoder_helper {
 #ifdef MULTIPLICITY
-	pTHX;
+	tTHX aTHX;
 #endif
 	SV* value;
 };
