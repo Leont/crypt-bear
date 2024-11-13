@@ -1,6 +1,8 @@
 Revision history for Crypt-Bear
 
 {{$NEXT}}
+
+0.002     2024-11-14 00:02:26+01:00 Europe/Brussels
           - Fix compilation issue on non-threaded perls
           - Declare interpreter pointers in a more backwards compatible way
 
