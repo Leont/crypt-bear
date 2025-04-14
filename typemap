@@ -55,14 +55,6 @@ T_MAP_POINTER_TYPE
 	$var = (map_get(${\ (qq[$ntype] =~ s/_type$/s/r) }, $arg, \"${\ (qq[$ntype] =~ s/_type$//r) }\").pointer)
 T_MAP_INT_TYPE
 	$var = (map_get(${\ (qq[$ntype] =~ s/_type$/s/r) }, $arg, \"${\ (qq[$ntype] =~ s/_type$//r) }\").integer)
-T_MAGICEXT_BASE
-	{
-	MAGIC* magic = SvROK($arg) && SvMAGICAL(SvRV($arg)) ? mg_find(SvRV($arg), PERL_MAGIC_ext) : NULL;
-	if (magic && magic->mg_virtual)
-		$var = ($type)magic->mg_ptr;
-	else
-		Perl_croak(aTHX_ \"$ntype object is lacking magic\");
-	}
 
 OUTPUT
 T_MAP_POINTER_TYPE
