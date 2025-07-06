@@ -1038,7 +1038,7 @@ MODULE = Crypt::Bear PACKAGE = Crypt::Bear::Hash PREFIX = br_hash_
 
 Crypt::Bear::Hash br_hash_new(class, hash_type hash)
 CODE:
-	RETVAL = safemalloc(hash->context_size);
+	RETVAL = safemalloc(sizeof *RETVAL);
 	(*hash->init)(&RETVAL->vtable);
 OUTPUT:
 	RETVAL
