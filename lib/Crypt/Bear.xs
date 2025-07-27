@@ -1018,7 +1018,7 @@ static const MGVTBL Crypt__Bear__SSL__Server_magic = {
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear PREFIX = br_
 
-PROTOTYPES: DISABLED
+PROTOTYPES: DISABLE
 
 SV* br_get_config(class)
 CODE:
