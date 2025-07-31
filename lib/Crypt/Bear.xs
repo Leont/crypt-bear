@@ -50,18 +50,19 @@ static const entry* S_map_reverse_find(pTHX_ const map table, size_t table_size,
 }
 #define map_reverse_find(table, value) S_map_reverse_find(aTHX_ table, sizeof table / sizeof *table, value)
 
-SV* S_make_buffer(pTHX_ size_t size) {
-	SV* result = newSVpv("", 0);
+static SV* S_make_buffer(pTHX_ size_t size) {
+	SV* result = newSVpv(NULL, 0);
 	SvGROW(result, size);
+	SvPOK_on(result);
 	SvCUR_set(result, size);
 	return result;
 }
 #define make_buffer(size) S_make_buffer(aTHX_ size)
 
-SV* S_make_magic(pTHX_ const void* object, const char* classname, const MGVTBL* virtual) {
+static SV* S_make_magic(pTHX_ const void* object, const char* classname, const MGVTBL* virtual) {
 	SV* result = newSV(0);
 	MAGIC* magic = sv_magicext(newSVrv(result, classname), NULL, PERL_MAGIC_ext, virtual, (const char*)object, 0);
-	magic->mg_flags |= MGf_COPY|MGf_DUP;
+	magic->mg_flags |= MGf_DUP;
 	return result;
 }
 #define make_magic(object, class, virtual) S_make_magic(aTHX_ object, class, virtual)
