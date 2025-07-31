@@ -258,7 +258,7 @@ static br_rsa_pkcs1_vrfy rsa_pkcs1_verify;
 static br_rsa_pkcs1_sign rsa_pkcs1_sign;
 static br_rsa_oaep_encrypt rsa_oaep_encrypt;
 static br_rsa_oaep_decrypt rsa_oaep_decrypt;
-static br_rsa_keygen rsa_keygen;
+static br_rsa_keygen br_rsa_generate_keypair;
 
 static void S_rsa_key_copy(pTHX_ br_rsa_public_key* dest, const br_rsa_public_key* source) {
 	char* buffer = safemalloc(source->nlen + source->elen);
@@ -1404,23 +1404,19 @@ OUTPUT:
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA PREFIX = br_rsa_
 BOOT:
-	rsa_keygen = br_rsa_keygen_get_default();
+	br_rsa_generate_keypair = br_rsa_keygen_get_default();
 
-void br_rsa_generate_keypair(Crypt::Bear::PRNG prng, size_t size, UV exponent = 0)
-PPCODE:
-	br_rsa_public_key* key = safemalloc(sizeof(br_rsa_public_key));
+NO_OUTPUT bool br_rsa_generate_keypair(Crypt::Bear::PRNG prng, OUTLIST Crypt::Bear::RSA::PublicKey key, OUTLIST Crypt::Bear::RSA::PrivateKey private_key, size_t size, UV exponent = 0)
+INIT:
+	key = safemalloc(sizeof(br_rsa_public_key));
 	char* public_buffer = safemalloc(BR_RSA_KBUF_PUB_SIZE(size));
-	br_rsa_private_key* private_key = safemalloc(sizeof(br_rsa_private_key));
+	private_key = safemalloc(sizeof(br_rsa_private_key));
 	char* private_buffer = safemalloc(BR_RSA_KBUF_PRIV_SIZE(size));
-	bool success = rsa_keygen(prng, private_key, private_buffer, key, public_buffer, size, exponent);
-
-	if (success) {
-		SV* public = make_magic(key, "Crypt::Bear::RSA::PublicKey", &Crypt__Bear__RSA__PublicKey_magic);
-		mXPUSHs(public);
-
-		SV* private = make_magic(private_key, "Crypt::Bear::RSA::PrivateKey", &Crypt__Bear__RSA__PrivateKey_magic);
-		mXPUSHs(private);
-	}
+C_ARGS:
+	prng, private_key, private_buffer, key, public_buffer, size, exponent
+POSTCALL:
+	if (!RETVAL)
+		XSRETURN(0);
 
 
 MODULE = Crypt::Bear PACKAGE = Crypt::Bear::RSA::PublicKey PREFIX = br_rsa_public_key_
